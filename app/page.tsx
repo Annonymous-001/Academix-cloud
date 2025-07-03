@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useRef, useEffect } from "react"
+import { useRef } from "react"
 import { motion, useInView, useScroll, useTransform, type Variants } from "framer-motion"
 import {
   Users,
@@ -222,57 +222,12 @@ function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
   )
 }
 
-// Loading animation component
-function LoadingAnimation() {
-  return (
-    <motion.div
-      className="fixed inset-0 z-50 bg-background flex items-center justify-center"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 0 }}
-      transition={{ duration: 0.8, delay: 0.5 }}
-      onAnimationComplete={() => {
-        const element = document.getElementById("loading-screen")
-        if (element) element.style.display = "none"
-      }}
-      id="loading-screen"
-    >
-      <motion.div
-        className="flex items-center space-x-2"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.div
-          className="flex items-center justify-center"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-        >
-          <AcademixLogo className="w-10 h-10" />
-        </motion.div>
-        <motion.span
-          className="text-xl font-bold"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          Academix Cloud
-        </motion.span>
-      </motion.div>
-    </motion.div>
-  )
-}
-
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLoaded, setIsLoaded] = useState(false)
   const { theme, setTheme } = useTheme()
   const { scrollYProgress } = useScroll()
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("yearly")
-
-  useEffect(() => {
-    setIsLoaded(true)
-  }, [])
 
   const userRoles = [
     {
@@ -422,10 +377,6 @@ export default function LandingPage() {
     },
   ]
 
-  if (!isLoaded) {
-    return <LoadingAnimation />
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation with entrance animation */}
@@ -463,8 +414,16 @@ export default function LandingPage() {
               <Link href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">
                 Reviews
               </Link>
+              <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+                About
+              </Link>
+              <Link href="/help" className="text-muted-foreground hover:text-foreground transition-colors">
+                Help
+              </Link>
               <ThemeToggle />
-              <Button variant="outline">Sign In</Button>
+              <Link href="/signin">
+                <Button variant="outline">Sign In</Button>
+              </Link>
               <Link href="/get-started">
                 <Button>Get Started</Button>
               </Link>
@@ -497,12 +456,23 @@ export default function LandingPage() {
                 <Link href="#testimonials" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
                   Reviews
                 </Link>
+                <Link href="/about" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+                  About
+                </Link>
+                <Link href="/help" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+                  Help
+                </Link>
+                <Link href="/contact" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+                  Contact
+                </Link>
                 <div className="flex space-x-2 px-3 py-2">
-                  <Button variant="outline" className="flex-1 bg-transparent">
-                    Sign In
-                  </Button>
-                  <Link href="/get-started" className="flex-1">
-                    <Button className="w-full">Get Started</Button>
+                  <Link href="/signin" className="flex-1">
+                    <Button variant="outline" className="w-full bg-transparent">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/signup" className="flex-1">
+                    <Button className="w-full">Sign Up</Button>
                   </Link>
                 </div>
               </div>
@@ -693,28 +663,39 @@ export default function LandingPage() {
           </AnimatedSection>
 
           <AnimatedSection>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <AnimatedCard key={testimonial.name} delay={index * 0.15} variant="popUp">
+            <div className="relative overflow-hidden">
+              <motion.div
+                className="flex space-x-8"
+                animate={{
+                  x: [0, -100 * testimonials.length],
+                }}
+                transition={{
+                  x: {
+                    repeat: Number.POSITIVE_INFINITY,
+                    repeatType: "loop",
+                    duration: 20,
+                    ease: "linear",
+                  },
+                }}
+              >
+                {[...testimonials, ...testimonials].map((testimonial, index) => (
                   <motion.div
+                    key={`${testimonial.name}-${index}`}
+                    className="flex-shrink-0 w-80"
                     whileHover={{
-                      scale: 1.02,
-                      rotateX: 2,
+                      scale: 1.05,
+                      y: -10,
                       transition: { duration: 0.3 },
                     }}
+                    onHoverStart={() => {
+                      // Pause animation on hover
+                    }}
                   >
-                    <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card/50 backdrop-blur-sm border-border/50">
+                    <Card className="h-full hover:shadow-lg transition-all duration-300 bg-card/50 backdrop-blur-sm border-border/50">
                       <CardHeader>
                         <div className="flex items-center space-x-1 mb-4">
                           {[...Array(testimonial.rating)].map((_, i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ opacity: 0, scale: 0 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: index * 0.15 + i * 0.1 }}
-                            >
-                              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                            </motion.div>
+                            <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                           ))}
                         </div>
                         <CardDescription className="text-base leading-relaxed">"{testimonial.content}"</CardDescription>
@@ -738,8 +719,8 @@ export default function LandingPage() {
                       </CardContent>
                     </Card>
                   </motion.div>
-                </AnimatedCard>
-              ))}
+                ))}
+              </motion.div>
             </div>
           </AnimatedSection>
         </div>
@@ -942,15 +923,30 @@ export default function LandingPage() {
             {[
               {
                 title: "Product",
-                links: ["Features", "Pricing", "Security", "Integrations"],
+                links: [
+                  { name: "Features", href: "#features" },
+                  { name: "Pricing", href: "#pricing" },
+                  { name: "Security", href: "/help" },
+                  { name: "Integrations", href: "/help" },
+                ],
               },
               {
                 title: "Company",
-                links: ["About", "Careers", "Contact", "Blog"],
+                links: [
+                  { name: "About", href: "/about" },
+                  { name: "Careers", href: "/contact" },
+                  { name: "Contact", href: "/contact" },
+                  { name: "Blog", href: "/help" },
+                ],
               },
               {
                 title: "Support",
-                links: ["Help Center", "Documentation", "Community", "Status"],
+                links: [
+                  { name: "Help Center", href: "/help" },
+                  { name: "Documentation", href: "/help" },
+                  { name: "Community", href: "/help" },
+                  { name: "Status", href: "/help" },
+                ],
               },
             ].map((section, index) => (
               <motion.div
@@ -963,9 +959,9 @@ export default function LandingPage() {
                 <h3 className="font-semibold mb-4">{section.title}</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   {section.links.map((link) => (
-                    <li key={link}>
-                      <Link href="#" className="hover:text-foreground transition-colors">
-                        {link}
+                    <li key={link.name}>
+                      <Link href={link.href} className="hover:text-foreground transition-colors">
+                        {link.name}
                       </Link>
                     </li>
                   ))}
@@ -975,13 +971,24 @@ export default function LandingPage() {
           </div>
 
           <motion.div
-            className="border-t mt-12 pt-8 text-center text-muted-foreground"
+            className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-muted-foreground"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
           >
             <p>&copy; 2024 Academix Cloud. All rights reserved.</p>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link href="/terms" className="hover:text-foreground transition-colors text-sm">
+                Terms of Service
+              </Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors text-sm">
+                Privacy Policy
+              </Link>
+              <Link href="/contact" className="hover:text-foreground transition-colors text-sm">
+                Contact
+              </Link>
+            </div>
           </motion.div>
         </div>
       </motion.footer>

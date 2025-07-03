@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { ArrowLeft, Calendar, Clock, Users, Video } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+
+// Enhanced animation variants with proper typing
+const fadeInUp: Variants = {
+  initial: { opacity: 0, y: 60 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.46, 0.45, 0.94] as const, // Properly typed easing
+    },
+  },
+}
+
+const fadeInScale: Variants = {
+  initial: { opacity: 0, scale: 0.8, y: 40 },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  },
+}
 
 function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
   return (
@@ -123,6 +149,19 @@ export default function ScheduleDemoPage() {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Book a personalized demo with our experts and discover how Academix Cloud can transform your institution.
             </p>
+            <div className="text-center mb-8">
+              <p className="text-muted-foreground">
+                Need help? Visit our{" "}
+                <Link href="/help" className="text-primary hover:underline">
+                  Help Center
+                </Link>{" "}
+                or{" "}
+                <Link href="/contact" className="text-primary hover:underline">
+                  contact support
+                </Link>
+                .
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">

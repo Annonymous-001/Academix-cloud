@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { ArrowLeft, Building } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,32 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+
+// Enhanced animation variants with proper typing
+const fadeInUp: Variants = {
+  initial: { opacity: 0, y: 60 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.46, 0.45, 0.94] as const, // Properly typed easing
+    },
+  },
+}
+
+const fadeInScale: Variants = {
+  initial: { opacity: 0, scale: 0.8, y: 40 },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  },
+}
 
 function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
   return (
@@ -274,11 +300,11 @@ export default function GetStartedPage() {
                     />
                     <Label htmlFor="agreeToTerms" className="text-sm">
                       I agree to the{" "}
-                      <Link href="#" className="text-primary hover:underline">
+                      <Link href="/terms" className="text-primary hover:underline">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="#" className="text-primary hover:underline">
+                      <Link href="/privacy" className="text-primary hover:underline">
                         Privacy Policy
                       </Link>
                       *
