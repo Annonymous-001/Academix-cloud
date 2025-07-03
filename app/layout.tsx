@@ -10,7 +10,23 @@ export const metadata: Metadata = {
   title: "Academix Cloud - Complete School Management Solution",
   description:
     "Streamline your educational institution with our comprehensive cloud-based platform. Manage students, teachers, parents, finances, and more.",
-    generator: 'v0.dev'
+  icons: {
+    icon: [
+      {
+        url: "/favicon.ico",
+        sizes: "16x16",
+        type: "image/x-icon",
+      },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      {
+        url: "/favicon.ico",
+        sizes: "180x180",
+        type: "image/x-icon",
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
@@ -20,6 +36,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}

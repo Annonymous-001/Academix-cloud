@@ -268,6 +268,7 @@ export default function LandingPage() {
   const { theme, setTheme } = useTheme()
   const { scrollYProgress } = useScroll()
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("yearly")
 
   useEffect(() => {
     setIsLoaded(true)
@@ -370,7 +371,8 @@ export default function LandingPage() {
     {
       name: "Starter",
       price: "$29",
-      period: "per month",
+      period: "month",
+      yearlyPrice: "$290",
       description: "Perfect for small schools and institutions",
       features: [
         "Up to 100 students",
@@ -385,7 +387,8 @@ export default function LandingPage() {
     {
       name: "Professional",
       price: "$79",
-      period: "per month",
+      period: "month",
+      yearlyPrice: "$790",
       description: "Ideal for growing educational institutions",
       features: [
         "Up to 500 students",
@@ -403,6 +406,7 @@ export default function LandingPage() {
       name: "Enterprise",
       price: "Custom",
       period: "contact us",
+      yearlyPrice: "Custom",
       description: "For large institutions with specific needs",
       features: [
         "Unlimited students",
@@ -461,7 +465,9 @@ export default function LandingPage() {
               </Link>
               <ThemeToggle />
               <Button variant="outline">Sign In</Button>
-              <Button>Get Started</Button>
+              <Link href="/get-started">
+                <Button>Get Started</Button>
+              </Link>
             </motion.div>
 
             {/* Mobile menu button */}
@@ -495,7 +501,9 @@ export default function LandingPage() {
                   <Button variant="outline" className="flex-1 bg-transparent">
                     Sign In
                   </Button>
-                  <Button className="flex-1">Get Started</Button>
+                  <Link href="/get-started" className="flex-1">
+                    <Button className="w-full">Get Started</Button>
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -529,13 +537,17 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" className="text-lg px-8">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
-                Watch Demo
-              </Button>
+              <Link href="/get-started">
+                <Button size="lg" className="text-lg px-8">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/schedule-demo">
+                <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
+                  Watch Demo
+                </Button>
+              </Link>
             </motion.div>
 
             <motion.div
@@ -733,7 +745,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section with enhanced pop-up effects */}
+      {/* Pricing Section with enhanced pop-up effects and month/year toggle */}
       <section id="pricing" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16" variant="slideInLeft">
@@ -745,9 +757,43 @@ export default function LandingPage() {
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold mb-6">
               Simple, Transparent Pricing
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <motion.p variants={fadeInUp} className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               Choose the perfect plan for your institution. All plans include core features with no hidden fees.
             </motion.p>
+
+            {/* Billing Toggle */}
+            <motion.div variants={fadeInUp} className="flex items-center justify-center space-x-4 mb-8">
+              <span
+                className={`text-sm font-medium transition-colors ${billingPeriod === "monthly" ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                Monthly
+              </span>
+              <div className="relative">
+                <button
+                  onClick={() => setBillingPeriod(billingPeriod === "monthly" ? "yearly" : "monthly")}
+                  className="flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full"
+                  aria-label="Toggle billing period"
+                >
+                  <div
+                    className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${billingPeriod === "yearly" ? "bg-primary" : "bg-muted"}`}
+                  >
+                    <div
+                      className={`absolute top-1 w-6 h-6 bg-background rounded-full shadow-md transition-transform duration-300 ${
+                        billingPeriod === "yearly" ? "translate-x-7" : "translate-x-1"
+                      }`}
+                    />
+                  </div>
+                </button>
+              </div>
+              <span
+                className={`text-sm font-medium transition-colors ${billingPeriod === "yearly" ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                Yearly
+                <Badge variant="secondary" className="ml-2">
+                  Save 20%
+                </Badge>
+              </span>
+            </motion.div>
           </AnimatedSection>
 
           <AnimatedSection>
@@ -777,8 +823,28 @@ export default function LandingPage() {
                       <CardHeader className="text-center">
                         <CardTitle className="text-2xl">{plan.name}</CardTitle>
                         <div className="mt-4">
-                          <span className="text-4xl font-bold">{plan.price}</span>
-                          {plan.price !== "Custom" && <span className="text-muted-foreground">/{plan.period}</span>}
+                          <span className="text-4xl font-bold">
+                            {plan.price === "Custom"
+                              ? "Custom"
+                              : billingPeriod === "monthly"
+                                ? plan.price
+                                : plan.yearlyPrice}
+                          </span>
+                          {plan.price !== "Custom" && (
+                            <div className="text-muted-foreground">
+                              <span className="text-lg">/{billingPeriod === "monthly" ? "month" : "year"}</span>
+                              {billingPeriod === "yearly" && (
+                                <div className="text-sm mt-1 text-green-600 font-medium">
+                                  Save $
+                                  {(
+                                    Number.parseInt(plan.price.replace("$", "")) * 12 -
+                                    Number.parseInt(plan.yearlyPrice.replace("$", ""))
+                                  ).toFixed(0)}{" "}
+                                  annually
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <CardDescription className="mt-2">{plan.description}</CardDescription>
                       </CardHeader>
@@ -797,9 +863,11 @@ export default function LandingPage() {
                             </motion.li>
                           ))}
                         </ul>
-                        <Button className="w-full mt-6" variant={plan.popular ? "default" : "outline"}>
-                          {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
-                        </Button>
+                        <Link href="/get-started">
+                          <Button className="w-full mt-6" variant={plan.popular ? "default" : "outline"}>
+                            {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
+                          </Button>
+                        </Link>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -822,19 +890,23 @@ export default function LandingPage() {
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="secondary" className="text-lg px-8">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                <Link href="/get-started">
+                  <Button size="lg" variant="secondary" className="text-lg px-8">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-8 border-white text-white hover:bg-white hover:text-blue-600 bg-transparent transition-all duration-300"
-                >
-                  Schedule Demo
-                </Button>
+                <Link href="/schedule-demo">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="text-lg px-8 border-white text-white hover:bg-white hover:text-blue-600 bg-transparent transition-all duration-300"
+                  >
+                    Schedule Demo
+                  </Button>
+                </Link>
               </motion.div>
             </motion.div>
           </AnimatedSection>
@@ -876,7 +948,6 @@ export default function LandingPage() {
                 title: "Company",
                 links: ["About", "Careers", "Contact", "Blog"],
               },
-              //
               {
                 title: "Support",
                 links: ["Help Center", "Documentation", "Community", "Status"],
