@@ -20,6 +20,8 @@ import {
   ArrowRight,
   Menu,
   X,
+  User,
+  LogOut,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -31,6 +33,15 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useAuth } from "@/hooks/use-auth"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 // Enhanced animation variants with proper typing
 const fadeInUp: Variants = {
@@ -228,6 +239,7 @@ export default function LandingPage() {
   const { scrollYProgress } = useScroll()
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("yearly")
+  const { user, isAuthenticated, logout } = useAuth()
 
   const userRoles = [
     {
@@ -421,17 +433,72 @@ export default function LandingPage() {
                 Help
               </Link>
               <ThemeToggle />
-              <Link href="/signin">
-                <Button variant="outline">Sign In</Button>
-              </Link>
-              <Link href="/get-started">
-                <Button>Get Started</Button>
-              </Link>
+              
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <Link href="/dashboard">
+                    <Button variant="outline">Dashboard</Button>
+                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src="/placeholder-user.jpg" alt={user?.name || "User"} />
+                          <AvatarFallback>
+                            {user?.name ? user.name.split(" ").map(n => n[0]).join("") : <User className="h-4 w-4" />}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user?.name}</p>
+                          <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                          <p className="text-xs leading-none text-muted-foreground capitalize">{user?.role}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Profile</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={logout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <Link href="/signin">
+                    <Button variant="outline">Sign In</Button>
+                  </Link>
+                  <Link href="/get-started">
+                    <Button>Get Started</Button>
+                  </Link>
+                </div>
+              )}
             </motion.div>
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center space-x-2">
               <ThemeToggle />
+              {isAuthenticated && (
+                <Link href="/dashboard">
+                  <Button variant="outline" size="sm">Dashboard</Button>
+                </Link>
+              )}
               <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
@@ -465,16 +532,46 @@ export default function LandingPage() {
                 <Link href="/contact" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
                   Contact
                 </Link>
-                <div className="flex space-x-2 px-3 py-2">
-                  <Link href="/signin" className="flex-1">
-                    <Button variant="outline" className="w-full bg-transparent">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/signup" className="flex-1">
-                    <Button className="w-full">Sign Up</Button>
-                  </Link>
-                </div>
+                
+                {isAuthenticated ? (
+                  <div className="space-y-2 px-3 py-2">
+                    <div className="flex items-center space-x-3 px-3 py-2 border rounded-lg bg-muted/50">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="/placeholder-user.jpg" alt={user?.name || "User"} />
+                        <AvatarFallback>
+                          {user?.name ? user.name.split(" ").map(n => n[0]).join("") : <User className="h-3 w-3" />}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                      </div>
+                    </div>
+                    <Link href="/dashboard" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+                      Dashboard
+                    </Link>
+                    <Link href="/profile" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+                      Profile
+                    </Link>
+                    <button 
+                      onClick={logout}
+                      className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex space-x-2 px-3 py-2">
+                    <Link href="/signin" className="flex-1">
+                      <Button variant="outline" className="w-full bg-transparent">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/signup" className="flex-1">
+                      <Button className="w-full">Sign Up</Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -507,17 +604,35 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Link href="/get-started">
-                <Button size="lg" className="text-lg px-8">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/schedule-demo">
-                <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
-                  Watch Demo
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button size="lg" className="text-lg px-8">
+                      Go to Dashboard
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/schedule-demo">
+                    <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
+                      Watch Demo
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/get-started">
+                    <Button size="lg" className="text-lg px-8">
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/schedule-demo">
+                    <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
+                      Watch Demo
+                    </Button>
+                  </Link>
+                </>
+              )}
             </motion.div>
 
             <motion.div
@@ -870,25 +985,51 @@ export default function LandingPage() {
               Join hundreds of educational institutions already using Academix Cloud to streamline their operations
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link href="/get-started">
-                  <Button size="lg" variant="secondary" className="text-lg px-8">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link href="/schedule-demo">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="text-lg px-8 border-white text-white hover:bg-white hover:text-blue-600 bg-transparent transition-all duration-300"
-                  >
-                    Schedule Demo
-                  </Button>
-                </Link>
-              </motion.div>
+              {isAuthenticated ? (
+                <>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link href="/dashboard">
+                      <Button size="lg" variant="secondary" className="text-lg px-8">
+                        Go to Dashboard
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link href="/schedule-demo">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="text-lg px-8 border-white text-white hover:bg-white hover:text-blue-600 bg-transparent transition-all duration-300"
+                      >
+                        Schedule Demo
+                      </Button>
+                    </Link>
+                  </motion.div>
+                </>
+              ) : (
+                <>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link href="/get-started">
+                      <Button size="lg" variant="secondary" className="text-lg px-8">
+                        Start Free Trial
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link href="/schedule-demo">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="text-lg px-8 border-white text-white hover:bg-white hover:text-blue-600 bg-transparent transition-all duration-300"
+                      >
+                        Schedule Demo
+                      </Button>
+                    </Link>
+                  </motion.div>
+                </>
+              )}
             </motion.div>
           </AnimatedSection>
         </div>

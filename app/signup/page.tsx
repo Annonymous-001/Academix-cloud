@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import { useAuth } from "@/hooks/use-auth"
+import { toast } from "sonner"
 
 function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
   return (
@@ -22,6 +24,7 @@ function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
 }
 
 export default function SignUpPage() {
+  const { register } = useAuth()
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -43,13 +46,40 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match")
+      return
+    }
+
+    if (!formData.agreeToTerms) {
+      toast.error("Please agree to the terms and conditions")
+      return
+    }
+
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    setIsLoading(false)
-    // Handle successful signup here
+    try {
+      const result = await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        institutionName: formData.institutionName,
+        role: formData.role,
+        subscribeNewsletter: formData.subscribeNewsletter,
+      })
+      
+      if (result?.success) {
+        toast.success("Account created successfully!")
+      } else {
+        toast.error(result?.error || "Failed to create account")
+      }
+    } catch (error) {
+      toast.error("An error occurred during registration")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -163,7 +193,7 @@ export default function SignUpPage() {
                     <SelectItem value="principal">Principal/Director</SelectItem>
                     <SelectItem value="teacher">Teacher</SelectItem>
                     <SelectItem value="accountant">Accountant</SelectItem>
-                    <SelectItem value="it-manager">IT Manager</SelectItem>
+                    <SelectItem value="it_manager">IT Manager</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>

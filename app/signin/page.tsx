@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import { useAuth } from "@/hooks/use-auth"
+import { toast } from "sonner"
 
 function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
   return (
@@ -21,6 +23,7 @@ function AcademixLogo({ className = "w-8 h-8" }: { className?: string }) {
 }
 
 export default function SignInPage() {
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -37,11 +40,19 @@ export default function SignInPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    setIsLoading(false)
-    // Handle successful login here
+    try {
+      const result = await login(formData.email, formData.password)
+      
+      if (result?.success) {
+        toast.success("Successfully signed in!")
+      } else {
+        toast.error(result?.error || "Invalid credentials")
+      }
+    } catch (error) {
+      toast.error("An error occurred during sign in")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
